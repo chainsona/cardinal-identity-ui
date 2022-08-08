@@ -83,7 +83,7 @@ export async function tryGetProfile(
     const response = await fetch(
       `${apiBase(
         dev
-      )}/namespaces//twitter/proxy?url=https://api.twitter.com/2/users/by&usernames=${handle}&user.fields=profile_image_url`
+      )}/namespaces/twitter/proxy?url=https://api.twitter.com/2/users/by&usernames=${handle}&user.fields=profile_image_url`
     )
     const json = (await response.json()) as {
       data: {

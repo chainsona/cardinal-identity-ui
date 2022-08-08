@@ -71,7 +71,8 @@ export const NameEntryRow = ({
   const handleSetNamespacesDefault = useHandleSetNamespaceDefault(
     connection,
     wallet,
-    namespaceName
+    namespaceName,
+    cluster
   )
   const handleSetGlobalDefault = useHandleSetGlobalDefault(
     connection,
@@ -336,7 +337,8 @@ export const NameManager = ({
   const handleSetNamespacesDefault = useHandleSetNamespaceDefault(
     connection,
     wallet,
-    namespaceName
+    namespaceName,
+    cluster
   )
   const handleSetGlobalDefault = useHandleSetGlobalDefault(
     connection,

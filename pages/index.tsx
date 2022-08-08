@@ -18,12 +18,17 @@ export const TwitterBackground = styled.div`
 const TwitterHome = () => {
   const wallet = useWallet()
   const router = useRouter()
+  const dev = router.query['cluster'] === 'devnet'
 
   useEffect(() => {
     if (wallet.connected) {
-      router.push(`/${wallet?.publicKey?.toString()}`, undefined, {
-        shallow: true,
-      })
+      router.push(
+        `/${wallet?.publicKey?.toString()}${dev ? '?cluster=devnet' : ''}`,
+        undefined,
+        {
+          shallow: true,
+        }
+      )
     }
   }, [wallet.connected, wallet.publicKey, router])
 
