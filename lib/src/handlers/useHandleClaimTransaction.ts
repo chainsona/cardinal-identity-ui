@@ -35,23 +35,26 @@ export const useHandleClaimTransaction = (
       handle?: string
     }): Promise<string> => {
       const trace = tracer({ name: 'useHandleClaim' })
-      const tx = await withTrace(
+      const transactions = await withTrace(
         () => handleClaim(wallet, cluster, handle, tweetId),
         trace,
         { op: 'handleClaim' }
       )
-      if (!tx) return ''
-      await wallet.signTransaction!(tx)
-      const txid = withTrace(
-        () =>
-          sendAndConfirmRawTransaction(connection, tx.serialize(), {
-            skipPreflight: true,
-          }),
-        trace,
-        { op: 'sendTransaction' }
-      )
+      if (!transactions) return ''
+      let txId = ''
+      await wallet.signAllTransactions(transactions)
+      for (const tx of transactions) {
+        txId = await withTrace(
+          () =>
+            sendAndConfirmRawTransaction(connection, tx.serialize(), {
+              skipPreflight: true,
+            }),
+          trace,
+          { op: 'sendTransaction' }
+        )
+      }
       trace?.finish()
-      return txid
+      return txId
     },
     {
       onSuccess: () => queryClient.invalidateQueries(),
@@ -64,7 +67,7 @@ export async function handleClaim(
   cluster: Cluster,
   handle: string | undefined,
   tweetId: string | undefined
-): Promise<Transaction | null> {
+): Promise<Transaction[] | null> {
   if (!handle || !tweetId) return null
   const response = await fetch(
     `${apiBase(
@@ -82,7 +85,8 @@ export async function handleClaim(
   )
   const json = await response.json()
   if (response.status !== 200 || json.error) throw new Error(json.error)
-  const { transaction } = json
-  const buffer = Buffer.from(decodeURIComponent(transaction), 'base64')
-  return Transaction.from(buffer)
+  const transactions = json.transactions as string[]
+  return transactions.map((tx) =>
+    Transaction.from(Buffer.from(decodeURIComponent(tx), 'base64'))
+  )
 }

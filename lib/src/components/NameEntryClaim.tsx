@@ -244,34 +244,6 @@ export const NameEntryClaim = ({
                                 If you wish to continue, you will revoke this
                                 handle from them.
                               </div>
-                              <ButtonWrapper>
-                                <ButtonLight
-                                  onClick={() =>
-                                    handleRevoke.mutate(
-                                      { tweetId, handle },
-                                      {
-                                        onSuccess: () => {
-                                          notify({
-                                            message: 'Revoke successful',
-                                          })
-                                        },
-                                        onError: (e) => {
-                                          notify({
-                                            message: `Failed Transaction`,
-                                            description: e as string,
-                                          })
-                                        },
-                                      }
-                                    )
-                                  }
-                                >
-                                  {handleRevoke.isLoading ? (
-                                    <LoadingSpinner height="15px" fill="#000" />
-                                  ) : (
-                                    <>Revoke</>
-                                  )}
-                                </ButtonLight>
-                              </ButtonWrapper>
                             </>
                           )}
                           {handleRevoke.error && (
@@ -341,8 +313,9 @@ export const NameEntryClaim = ({
         disabled={
           !handleVerify.isSuccess ||
           tweetUrl?.length === 0 ||
-          !nameEntryData.isFetched ||
-          (alreadyOwned && !handleRevoke.isSuccess)
+          nameEntryData.isFetching ||
+          nameEntryData?.data?.owner?.toString() ===
+            wallet?.publicKey?.toString()
         }
         onClick={async () => {
           let isMasterEdition = true
