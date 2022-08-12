@@ -4,8 +4,6 @@ import type { Cluster, Connection } from '@solana/web3.js'
 import { useMemo, useState } from 'react'
 
 import { Alert } from '../common/Alert'
-import { ButtonLight } from '../common/Button'
-import { LoadingSpinner } from '../common/LoadingSpinner'
 import { useHandleClaimTransaction } from '../handlers/useHandleClaimTransaction'
 import { useHandleRevoke } from '../handlers/useHandleRevoke'
 import { useHandleVerify } from '../handlers/useHandleVerify'
@@ -18,7 +16,6 @@ import { LabeledInput } from './LabeledInput'
 import { PostTweet } from './PostTweet'
 import { StepDetail } from './StepDetail'
 import { TwitterHandleNFT } from './TwitterHandleNFT'
-import { MasterEdition } from '@metaplex-foundation/mpl-token-metadata'
 import { useHandleSetNamespaceDefault } from '../handlers/useHandleSetNamespaceDefault'
 import { notify } from '../common/Notification'
 import { handleError } from '../utils/errors'
@@ -306,8 +303,9 @@ export const NameEntryClaim = ({
       </DetailsWrapper>
       <ButtonWithFooter
         loading={
-          handleClaimTransaction.isLoading ||
-          handleSetNamespaceDefault.isLoading
+          !onComplete &&
+          (handleClaimTransaction.isLoading ||
+            handleSetNamespaceDefault.isLoading)
         }
         complete={handleClaimTransaction.isSuccess}
         disabled={
@@ -318,52 +316,22 @@ export const NameEntryClaim = ({
             wallet?.publicKey?.toString()
         }
         onClick={async () => {
-          let isMasterEdition = true
-          if (nameEntryData.data?.nameEntry.parsed) {
-            const masterEditionId = await MasterEdition.getPDA(
-              nameEntryData.data?.nameEntry.parsed.mint
-            )
-            try {
-              await MasterEdition.getInfo(connection, masterEditionId)
-            } catch (e) {
-              isMasterEdition = false
+          handleClaimTransaction.mutate(
+            {
+              tweetId,
+              handle,
+            },
+            {
+              onSuccess: () => {
+                onComplete && onComplete(handle || '')
+              },
+              onError: (e) =>
+                notify({
+                  message: `Failed Transaction`,
+                  description: e as string,
+                }),
             }
-          }
-          if (!isMasterEdition) {
-            handleSetNamespaceDefault.mutate(
-              {
-                tokenData: { metaplexData: nameEntryData.data?.metaplexData },
-                forceMigrate: true,
-              },
-              {
-                onSuccess: () => {
-                  onComplete && onComplete(handle || '')
-                },
-                onError: (e) =>
-                  notify({
-                    message: `Failed Transaction`,
-                    description: e as string,
-                  }),
-              }
-            )
-          } else {
-            handleClaimTransaction.mutate(
-              {
-                tweetId,
-                handle,
-              },
-              {
-                onSuccess: () => {
-                  onComplete && onComplete(handle || '')
-                },
-                onError: (e) =>
-                  notify({
-                    message: `Failed Transaction`,
-                    description: e as string,
-                  }),
-              }
-            )
-          }
+          )
         }}
       >
         Claim {handle && `@${handle}`}
