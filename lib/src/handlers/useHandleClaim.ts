@@ -19,7 +19,7 @@ export interface HandleSetParam {
   certificate?: AccountData<CertificateData> | null
 }
 
-export const useHandleClaimTransaction = (
+export const useHandleClaim = (
   connection: Connection,
   wallet: Wallet,
   cluster: Cluster,
@@ -37,25 +37,26 @@ export const useHandleClaimTransaction = (
     }): Promise<string> => {
       const trace = tracer({ name: 'useHandleClaim' })
       const transactions = await withTrace(
-        () => handleClaim(wallet, cluster, handle, tweetId),
+        () => handleClaimTransaction(wallet, cluster, handle, tweetId, dev),
         trace,
         { op: 'handleClaim' }
       )
-      if (!transactions) return ''
-      let txId = ''
-      await wallet.signAllTransactions(transactions)
-      for (const tx of transactions) {
-        txId = await withTrace(
-          () =>
-            sendAndConfirmRawTransaction(connection, tx.serialize(), {
-              skipPreflight: true,
-            }),
-          trace,
-          { op: 'sendTransaction' }
-        )
+      let txid = ''
+      if (transactions) {
+        await wallet.signAllTransactions(transactions)
+        for (const tx of transactions) {
+          txid = await withTrace(
+            () =>
+              sendAndConfirmRawTransaction(connection, tx.serialize(), {
+                skipPreflight: true,
+              }),
+            trace,
+            { op: 'sendTransaction' }
+          )
+        }
       }
       trace?.finish()
-      return txId
+      return txid
     },
     {
       onSuccess: () => queryClient.invalidateQueries(),
@@ -63,7 +64,7 @@ export const useHandleClaimTransaction = (
   )
 }
 
-export async function handleClaim(
+export async function handleClaimTransaction(
   wallet: Wallet,
   cluster: Cluster,
   handle: string | undefined,

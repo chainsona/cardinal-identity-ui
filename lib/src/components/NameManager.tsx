@@ -1,7 +1,7 @@
 import { getQueryParam } from '@cardinal/common'
 import { breakName, formatName } from '@cardinal/namespaces'
 import type { Wallet } from '@saberhq/solana-contrib'
-import type { Connection } from '@solana/web3.js'
+import type { Cluster, Connection } from '@solana/web3.js'
 import type { ReactElement } from 'react'
 import { useEffect, useState } from 'react'
 import { AiFillStar } from 'react-icons/ai'
@@ -33,21 +33,23 @@ export const nameFromMint = (name: string, uri: string): [string, string] => {
 }
 
 export const NameEntryRow = ({
-  cluster,
+  cluster = 'mainnet-beta',
   connection,
   wallet,
   namespaceName,
   userTokenData,
   setError,
   setSuccess,
+  dev,
 }: {
-  cluster?: string
+  cluster?: Cluster
   connection: Connection
   wallet: Wallet
   namespaceName: string
   userTokenData: UserTokenData
   setError: (e: unknown) => void
   setSuccess: (e: ReactElement) => void
+  dev?: boolean
 }) => {
   const userNamesForNamespace = useUserNamesForNamespace(
     connection,
@@ -75,7 +77,9 @@ export const NameEntryRow = ({
     connection,
     wallet,
     namespaceName,
-    userTokenData
+    userTokenData,
+    cluster,
+    dev
   )
   const handleSetNamespacesDefault = useHandleSetNamespaceDefault(
     connection,
@@ -250,36 +254,7 @@ export const NameEntryRow = ({
             className="flex items-center gap-1"
             onClick={async () =>
               handleUnlink.mutate(
-                {
-                  globalReverseNameEntryData:
-                    globalReverseEntry.data &&
-                    formatName(
-                      namespaceName,
-                      globalReverseEntry.data.parsed.entryName
-                    ) ===
-                      formatName(
-                        ...nameFromMint(
-                          userTokenData.metaplexData?.parsed.data.name || '',
-                          userTokenData.metaplexData?.parsed.data.uri || ''
-                        )
-                      )
-                      ? globalReverseEntry.data
-                      : undefined,
-                  namespaceReverseEntry:
-                    namespaceReverseEntry.data &&
-                    formatName(
-                      namespaceName,
-                      namespaceReverseEntry.data.parsed.entryName
-                    ) ===
-                      formatName(
-                        ...nameFromMint(
-                          userTokenData.metaplexData?.parsed.data.name || '',
-                          userTokenData.metaplexData?.parsed.data.uri || ''
-                        )
-                      )
-                      ? namespaceReverseEntry.data
-                      : undefined,
-                },
+                {},
                 {
                   onSuccess: (txid) => {
                     userNamesForNamespace.remove()
@@ -344,11 +319,13 @@ export const NameManager = ({
   wallet,
   namespaceName,
   cluster,
+  dev,
 }: {
   connection: Connection
   wallet: Wallet
   namespaceName: string
-  cluster?: string
+  cluster?: Cluster
+  dev?: boolean
 }) => {
   const [error, setError] = useState<unknown>()
   const [success, setSuccess] = useState<ReactElement>()
@@ -435,6 +412,7 @@ export const NameManager = ({
                 setError={setError}
                 setSuccess={setSuccess}
                 cluster={cluster}
+                dev={dev}
               />
             ))}
           {handleSetNamespacesDefault.error && (

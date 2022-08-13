@@ -1,3 +1,13 @@
+import type { Wallet } from '@saberhq/solana-contrib'
+import type { Cluster, Connection } from '@solana/web3.js'
+import { sendAndConfirmRawTransaction, Transaction } from '@solana/web3.js'
+import { useMutation, useQueryClient } from 'react-query'
+
+import { nameFromMint } from '../components/NameManager'
+import type { UserTokenData } from '../hooks/useUserNamesForNamespace'
+import { tracer, withTrace } from '../utils/trace'
+import { apiBase } from '../utils/constants'
+
 import { withRevokeCertificateV2 } from '@cardinal/certificates'
 import { AccountData } from '@cardinal/common'
 import {
@@ -6,65 +16,84 @@ import {
 } from '@cardinal/namespaces'
 import { withInvalidateExpiredReverseEntry } from '@cardinal/namespaces'
 import * as namespaces from '@cardinal/namespaces'
-import type { Wallet } from '@saberhq/solana-contrib'
-import type { Connection } from '@solana/web3.js'
-import {
-  PublicKey,
-  sendAndConfirmRawTransaction,
-  Transaction,
-} from '@solana/web3.js'
-import { useMutation, useQueryClient } from 'react-query'
-
-import { nameFromMint } from '../components/NameManager'
-import type { UserTokenData } from '../hooks/useUserNamesForNamespace'
+import { PublicKey } from '@solana/web3.js'
 import { withInvalidate } from '@cardinal/token-manager'
-import { tracer, withTrace } from '../utils/trace'
 
 export const useHandleUnlink = (
   connection: Connection,
   wallet: Wallet,
   namespaceName: string,
-  userTokenData: UserTokenData
+  userTokenData: UserTokenData,
+  cluster: Cluster,
+  dev = false
 ) => {
   const queryClient = useQueryClient()
   return useMutation(
-    async ({
-      globalReverseNameEntryData,
-      namespaceReverseEntry,
-    }: {
-      globalReverseNameEntryData?: AccountData<ReverseEntryData>
-      namespaceReverseEntry?: AccountData<ReverseEntryData>
-    }): Promise<string> => {
+    async ({}: {}): Promise<string> => {
       const trace = tracer({ name: 'useHandleUnlink' })
-      const transaction = await withTrace(
-        () =>
-          handleUnlink(connection, wallet, {
-            namespaceName: namespaceName,
-            userTokenData: userTokenData,
-            globalReverseNameEntryData: globalReverseNameEntryData,
-            namespaceReverseEntry: namespaceReverseEntry,
-          }),
-        trace,
-        { op: 'handleUnlink' }
+      const [, entryName] = nameFromMint(
+        userTokenData.metaplexData?.parsed.data.name!,
+        userTokenData.metaplexData?.parsed.data.uri!
       )
-      transaction.feePayer = wallet.publicKey
-      transaction.recentBlockhash = (
-        await connection.getRecentBlockhash('max')
-      ).blockhash
-      await wallet.signTransaction(transaction)
-      const txid = withTrace(
+      const transactions = await withTrace(
         () =>
-          sendAndConfirmRawTransaction(connection, transaction.serialize(), {
-            skipPreflight: true,
-          }),
+          handleUnlinkTransaction(
+            wallet,
+            cluster,
+            entryName,
+            namespaceName,
+            dev
+          ),
         trace,
-        { op: 'sendTransaction' }
+        { op: 'handleUnlinkTransaction' }
       )
+      let txid = ''
+      if (transactions) {
+        await wallet.signAllTransactions(transactions)
+        for (const tx of transactions) {
+          txid = await withTrace(
+            () =>
+              sendAndConfirmRawTransaction(connection, tx.serialize(), {
+                skipPreflight: true,
+              }),
+            trace,
+            { op: 'sendTransaction' }
+          )
+        }
+      }
+      trace?.finish()
       return txid
     },
     {
       onSuccess: () => queryClient.invalidateQueries(),
     }
+  )
+}
+
+export async function handleUnlinkTransaction(
+  wallet: Wallet,
+  cluster: Cluster,
+  entryName: string,
+  namespaceName: string,
+  dev?: boolean
+): Promise<Transaction[] | null> {
+  const response = await fetch(
+    `${apiBase(dev)}/namespaces/${namespaceName}/unlink?handle=${entryName}${
+      cluster === 'devnet' ? `&cluster=${cluster}` : ''
+    }`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        account: wallet.publicKey.toString(),
+      }),
+    }
+  )
+  const json = await response.json()
+  if (response.status !== 200 || json.error) throw new Error(json.error)
+  const transactions = json.transactions as string[]
+  return transactions.map((tx) =>
+    Transaction.from(Buffer.from(decodeURIComponent(tx), 'base64'))
   )
 }
 

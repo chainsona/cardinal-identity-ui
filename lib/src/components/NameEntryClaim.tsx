@@ -4,7 +4,7 @@ import type { Cluster, Connection } from '@solana/web3.js'
 import { useMemo, useState } from 'react'
 
 import { Alert } from '../common/Alert'
-import { useHandleClaimTransaction } from '../handlers/useHandleClaimTransaction'
+import { useHandleClaim } from '../handlers/useHandleClaim'
 import { useHandleRevoke } from '../handlers/useHandleRevoke'
 import { useHandleVerify } from '../handlers/useHandleVerify'
 import { useNameEntryData } from '../hooks/useNameEntryData'
@@ -64,12 +64,7 @@ export const NameEntryClaim = ({
   )
   const handleVerify = useHandleVerify(wallet, cluster, dev)
   const handleRevoke = useHandleRevoke(wallet, cluster, dev)
-  const handleClaimTransaction = useHandleClaimTransaction(
-    connection,
-    wallet,
-    cluster,
-    dev
-  )
+  const handleClaim = useHandleClaim(connection, wallet, cluster, dev)
 
   const handleSetNamespaceDefault = useHandleSetNamespaceDefault(
     connection,
@@ -272,7 +267,7 @@ export const NameEntryClaim = ({
             </>
           }
         />
-        {handleClaimTransaction.error && (
+        {handleClaim.error && (
           <Alert
             style={{
               height: 'auto',
@@ -280,7 +275,7 @@ export const NameEntryClaim = ({
             }}
             message={
               <>
-                <div>{`${handleClaimTransaction.error}`}</div>
+                <div>{`${handleClaim.error}`}</div>
               </>
             }
             type="error"
@@ -304,11 +299,8 @@ export const NameEntryClaim = ({
         )}
       </DetailsWrapper>
       <ButtonWithFooter
-        loading={
-          handleClaimTransaction.isLoading ||
-          handleSetNamespaceDefault.isLoading
-        }
-        complete={handleClaimTransaction.isSuccess}
+        loading={handleClaim.isLoading || handleSetNamespaceDefault.isLoading}
+        complete={handleClaim.isSuccess}
         disabled={
           !handleVerify.isSuccess ||
           tweetUrl?.length === 0 ||
@@ -317,7 +309,7 @@ export const NameEntryClaim = ({
             wallet?.publicKey?.toString()
         }
         onClick={async () => {
-          handleClaimTransaction.mutate(
+          handleClaim.mutate(
             {
               tweetId,
               handle,
