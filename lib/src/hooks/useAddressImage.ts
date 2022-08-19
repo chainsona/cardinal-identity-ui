@@ -22,6 +22,7 @@ export const useAddressImage = (
           () => getImageUrl(reverseEntryNamespaceName, reverseEntryName, dev),
           tracer({ name: 'useAddressImage' })
         )
+        console.log('imageUrl', imageUrl)
         return imageUrl ? [imageUrl, addressName.data[1]] : undefined
       }
     },

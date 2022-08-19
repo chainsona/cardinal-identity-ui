@@ -1,3 +1,4 @@
+import { contrastColorMode } from '@cardinal/common'
 import { css } from '@emotion/react'
 import type { Wallet } from '@saberhq/solana-contrib'
 import { useWallet } from '@solana/wallet-adapter-react'
@@ -90,6 +91,7 @@ export const Profile: React.FC<Props> = ({ address }: Props) => {
                 height: '150px',
                 width: '150px',
                 border: '4px solid white',
+                backgroundColor: '#fff',
               }}
               alt={`profile-${addressStr}`}
               src={addressImage.data[0]}
@@ -129,7 +131,18 @@ export const Profile: React.FC<Props> = ({ address }: Props) => {
           </div>
         )}
         <div className="flex flex-col justify-center text-center">
-          <DisplayAddress size={16} connection={connection} address={address} />
+          <DisplayAddress
+            size={16}
+            connection={connection}
+            dark={
+              identity?.colors.buttonColor
+                ? contrastColorMode(identity?.colors.buttonColor)[1]
+                  ? true
+                  : false
+                : undefined
+            }
+            address={address}
+          />
           <AddressLink address={address} />
         </div>
         {identity && (

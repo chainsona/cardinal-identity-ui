@@ -30,7 +30,7 @@
     "@cardinal/certificates": "^2.0.1",
     "@cardinal/common": "^2.0.10",
     "@cardinal/eslint-config-react": "^1.0.10",
-    "@cardinal/namespaces": "^4.1.53",
+    "@cardinal/namespaces": "^4.1.55",
     "@cardinal/token-manager": "^1.5.12",
     "@emotion/babel-preset-css-prop": "^11.10.0",
     "@emotion/core": "^11.0.0",

@@ -43,7 +43,7 @@ export const NameManager = ({
 
   return (
     <div>
-      <div className="text-dark-6 mb-6 text-center text-2xl">
+      <div className="mb-6 text-center text-2xl text-dark-6">
         {appInfo?.name ? `${appInfo.name} uses` : 'Use'} Cardinal to manage to
         your personal <strong>Solana</strong> identity.
       </div>
@@ -59,7 +59,7 @@ export const NameManager = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div
-                    className="bg-dark-6 flex h-5 w-5 items-center justify-center rounded-full px-1"
+                    className="flex h-5 w-5 items-center justify-center rounded-full bg-dark-6 px-1"
                     style={{ background: identity.colors.primary }}
                   >
                     {!!identity.icon &&

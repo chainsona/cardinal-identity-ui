@@ -60,7 +60,11 @@ export const DisplayAddress: React.FC<Props> = ({
       {!hideIcon &&
         identity &&
         identity.icon &&
-        identity.icon({ variant: 'colored', width: size, height: size })}
+        identity.icon({
+          variant: 'colored',
+          width: size,
+          height: size,
+        })}
     </div>
   )
 }

@@ -31,7 +31,11 @@ export const VerificationButton = ({
         disabled={disabled}
       >
         {identity && identity.icon({ variant: 'light', height: 14, width: 14 })}
-        <span style={{ fontSize: '12px' }}>Verify</span>
+        <span
+          style={{ color: identity.colors.primaryFontColor, fontSize: '12px' }}
+        >
+          Verify
+        </span>
       </ButtonLight>
     </div>
   )

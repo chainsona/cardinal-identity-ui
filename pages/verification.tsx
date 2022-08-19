@@ -73,7 +73,12 @@ const Verification = () => {
                       {linkCopied && (
                         <IoCheckmarkCircleOutline className="text-lg" />
                       )}
-                      <span>Copy URL</span>
+                      <span
+                        className="px-1"
+                        style={{ color: identity?.colors.primaryFontColor }}
+                      >
+                        Copy URL
+                      </span>
                     </ButtonLight>
                   </div>
                 </Tooltip>
