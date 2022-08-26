@@ -54,6 +54,7 @@ The UI has the following components
 
 ```shell
 yarn add @cardinal/namespaces \
+         @cardinal/namespaces-components \
          @solana/web3.js \
          react
 ```
@@ -65,13 +66,17 @@ import '@cardinal/namespaces-components/dist/esm/styles.css'
 import { WalletProvider } from '@solana/wallet-adapter-react'
 import { getWalletAdapters } from '@solana/wallet-adapter-wallets'
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
-import { WalletIdentityProvider } from '@cardinal/namespaces-components'
+import {
+  IDENTITIES,
+  WalletIdentityProvider,
+} from '@cardinal/namespaces-components'
 
 require('@solana/wallet-adapter-react-ui/styles.css')
 
 const App = () => (
   <WalletProvider autoConnect wallets={getWalletAdapters()}>
-    <WalletIdentityProvider>
+    {/* Specify desired identities to use in priority order */}
+    <WalletIdentityProvider identities={[IDENTITIES['twitter']]}>
       <WalletModalProvider>
         {/* Your app's components go here, nested within the context providers. */}
       </WalletModalProvider>
@@ -134,11 +139,12 @@ import { Wallet } from '@saberhq/solana-contrib'
 export const User: FC = () => {
   const { connection } = useConnection()
   const wallet = useWallet()
-  const { displayName, loadingName, refreshName } = useAddressName(
-    connection,
-    wallet.publicKey
-  )
-  const { addressImage, loadingImage } = useAddressImage(
+  const {
+    data: displayName,
+    isFetching: loadingName,
+    refetch,
+  } = useAddressName(connection, wallet.publicKey)
+  const { data: addressImage, isFetching: loadingImage } = useAddressImage(
     connection,
     wallet.publicKey
   )

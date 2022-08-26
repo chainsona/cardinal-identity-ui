@@ -16,7 +16,7 @@ export const ButtonLight: React.FC<Props> = ({
 }: Props) => {
   return (
     <div
-      className={`text-light-4 flex items-center justify-center rounded-[5px] bg-[#EEE] px-2 py-1 text-center text-xs transition-all duration-300 hover:bg-[#DDD] ${className} ${
+      className={`flex items-center justify-center rounded-[5px] bg-[#EEE] px-2 py-1 text-center text-xs text-light-4 transition-all duration-300 hover:bg-[#DDD] ${className} ${
         disabled ? 'cursor-default opacity-50' : 'cursor-pointer'
       }`}
       {...props}
@@ -35,7 +35,7 @@ export const ButtonLight: React.FC<Props> = ({
         `
       }
     >
-      {children}
+      <>{children}</>
     </div>
   )
 }

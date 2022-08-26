@@ -29,7 +29,11 @@ export type Identity = {
     entryName?: string,
     dev?: boolean
   ) => Promise<string | undefined>
-  verificationUrl: (address?: string, appInfo?: AppInfo) => string
+  verificationUrl: (
+    handle?: string,
+    address?: string,
+    appInfo?: AppInfo
+  ) => string
   verifierUrl: (
     address: string,
     proof: string,
@@ -94,7 +98,7 @@ export const IDENTITIES: {
       }
       return json?.data[0]?.profile_image_url.replace('_normal', '') as string
     },
-    verificationUrl: (address, appInfo) => {
+    verificationUrl: (handle, address, appInfo) => {
       const tweetAt = appInfo?.twitter ?? appInfo?.name
       return [
         `https://twitter.com/intent/tweet?text=`,
@@ -103,7 +107,9 @@ export const IDENTITIES: {
             `Claiming my Twitter handle as a @Solana NFT${
               tweetAt ? ` on ${tweetAt}` : ''
             } using @cardinal_labs protocol and linking it to my address ${address}\n\n`,
-            `Verify and claim yours at https://twitter.cardinal.so!`,
+            `Verify and claim yours at https://twitter.cardinal.so/${
+              address ?? ''
+            }${handle ? `?handle=${handle}` : ''}`,
           ].join('')
         ),
       ].join('')

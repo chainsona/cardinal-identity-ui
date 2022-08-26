@@ -5,6 +5,7 @@ import type { PublicKey } from '@solana/web3.js'
 import { Header } from 'common/Header'
 import { PlaceholderProfile, Profile } from 'components/Profile'
 import { tryPublicKey, useWalletIdentity } from 'lib/src'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEnvironmentCtx } from 'providers/EnvironmentProvider'
 import { useMemo, useState } from 'react'
@@ -46,6 +47,26 @@ const Home = () => {
       className={`fixed h-full w-full bg-dark-4`}
       style={{ background: identity?.colors.primary }}
     >
+      <Head>
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta property="twitter:domain" content="twitter.cardinal.so" />
+        <meta
+          name="twitter:title"
+          content={`Claim your ${identity?.displayName} handle on Solana!`}
+        />
+        <meta
+          name="twitter:description"
+          content={`Secure your identity on Solana by claiming your ${identity?.displayName} handle as an NFT, powered by Cardinal.`}
+        />
+        <meta
+          name="twitter:image"
+          content={`${
+            process.env.NEXT_PUBLIC_BASE_URL
+          }/api/twitter-card/${addressId}${
+            router.query.handle ? `?handle=${router.query.handle}` : ''
+          }`}
+        />
+      </Head>
       <Header />
       <div style={{ marginTop: '10vh' }}>
         {address ? (

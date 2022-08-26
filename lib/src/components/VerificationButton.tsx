@@ -9,14 +9,20 @@ export const VerificationButton = ({
   identity,
   disabled,
   callback,
+  handle,
 }: {
   wallet?: Wallet
   identity: Identity
   disabled: boolean
+  handle?: string
   callback?: () => void
 }) => {
   const { appInfo } = useWalletIdentity()
-  const link = identity.verificationUrl(wallet?.publicKey.toString(), appInfo)
+  const link = identity.verificationUrl(
+    handle,
+    wallet?.publicKey.toString(),
+    appInfo
+  )
   return (
     <div
       className="flex"

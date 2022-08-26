@@ -28,22 +28,8 @@ export default class MyDocument extends Document {
             data-emotion-css={this.props.ids?.join(' ')}
             dangerouslySetInnerHTML={{ __html: this.props.css }}
           />
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta property="twitter:domain" content="twitter.cardinal.so" />
-          <meta name="twitter:url" content="https://twitter.cardinal.so/" />
           <meta name="twitter:creator" content="@cardinal_labs" />
-          <meta
-            name="twitter:title"
-            content="Claim your Twitter handle on Solana!"
-          />
-          <meta
-            name="twitter:description"
-            content="Secure your identity on Solana by claiming your Twitter handle as an NFT, powered by Cardinal protocol."
-          />
-          <meta
-            name="twitter:image"
-            content="https://twitter.cardinal.so/assets/twitter-card.png"
-          />
+          <meta name="twitter:site" content="@cardinal_labs" />
         </Head>
         <body>
           <Main />

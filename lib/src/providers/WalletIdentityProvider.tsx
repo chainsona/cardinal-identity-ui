@@ -11,7 +11,7 @@ import { IDENTITIES } from '../common/Identities'
 import { Modal } from '../common/Modal'
 import { withSleep } from '../utils/transactions'
 
-const SENTRY_DSN =
+const WALLET_IDENTITY_SENTRY_DSN =
   'https://109718d85e0640f0b5f7160e2602b5f0@o1340959.ingest.sentry.io/6625303'
 
 export type AppInfo = {
@@ -74,7 +74,7 @@ export const WalletIdentityProvider: React.FC<Props> = ({
   const [message, setMessage] = useState<React.ReactNode>()
 
   Sentry.init({
-    dsn: SENTRY_DSN,
+    dsn: WALLET_IDENTITY_SENTRY_DSN,
     tracesSampleRate: 1.0,
   })
 
@@ -123,7 +123,7 @@ export const WalletIdentityProvider: React.FC<Props> = ({
     >
       <QueryClientProvider client={QUERY_CLIENT}>
         <Modal
-          className="text-dark-6 bg-white"
+          className="bg-white text-dark-6"
           isOpen={showIdentityModal}
           onDismiss={() => {
             setShowIdentityModal(false)

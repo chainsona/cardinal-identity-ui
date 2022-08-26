@@ -6,6 +6,8 @@ module.exports = withSentryConfig(
     env: {
       MAINNET_PRIMARY: process.env.MAINNET_PRIMARY,
       BASE_CLUSTER: process.env.BASE_CLUSTER,
+      NEXT_PUBLIC_BASE_URL:
+        process.env.NEXT_PUBLIC_BASE_URL || 'https://identity.cardinal.so',
     },
     webpack: (config) => {
       // Unset client-side javascript that only works server-side
