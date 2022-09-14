@@ -20,9 +20,6 @@ type Props = {
   hideDashboard?: boolean
 }
 
-
-
-
 export const Header: React.FC<Props> = ({ tabs, hideDashboard }: Props) => {
   const router = useRouter()
   const wallet = useWallet()
@@ -34,7 +31,7 @@ export const Header: React.FC<Props> = ({ tabs, hideDashboard }: Props) => {
   useEffect(() => {
     const anchor = router.asPath.split('#')[1]
     if (anchor !== tab) setTab(anchor || 'browse')
-  }, [router.asPath, tab])  
+  }, [router.asPath, tab])
 
   return (
     <div className="w-full px-4 py-4">
@@ -42,18 +39,34 @@ export const Header: React.FC<Props> = ({ tabs, hideDashboard }: Props) => {
         <div className="flex items-center gap-5">
           <div
             className="flex cursor-pointer items-center transition-opacity hover:opacity-60"
-            onClick={() => {             
+            onClick={() => {
               router.push(`/${location.search}`)
             }}
           >
-              <LogoTitled className="inline-block h-6" />
+            <LogoTitled className="inline-block h-6" />
+            <div className="absolute top-[54px] left-[200px] text-[10px] italic text-white">
+              <span
+                className="mr-2 ml-3 rounded-md px-[7px] py-1"
+                style={{ background: '#FFFFFF30' }}
+              >
+                identity
+              </span>
+              {environment.label !== 'mainnet-beta' && (
+                <span
+                  className="rounded-md px-[7px] py-1"
+                  style={{
+                    background: '#FFFFFF30',
+                    transform: 'translateY(20%)',
+                  }}
+                >
+                  {environment.label}
+                </span>
+              )}
+            </div>
           </div>
-          {environment.label !== 'mainnet-beta' && (
-            <div className="text-primary">{environment.label}</div>
-          )}
         </div>
-        
-        <div className="flex-5 flex items-center justify-end gap-6">          
+
+        <div className="flex-5 flex items-center justify-end gap-6">
           {wallet.connected && wallet.publicKey ? (
             <AccountConnect
               dark={true}
