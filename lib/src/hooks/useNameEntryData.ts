@@ -4,7 +4,6 @@ import { tryGetAccount } from '@cardinal/common'
 import type { EntryData } from '@cardinal/namespaces'
 import { getNameEntry, NAMESPACES_PROGRAM_ID } from '@cardinal/namespaces'
 import * as metaplex from '@metaplex-foundation/mpl-token-metadata'
-import * as anchor from '@project-serum/anchor'
 import * as splToken from '@solana/spl-token'
 import type { Connection, TokenAccountBalancePair } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
@@ -57,19 +56,11 @@ export async function getNameEntryData(
     trace,
     { op: 'getTokenLargestAccounts' }
   )
-  const certificateMintToken = new splToken.Token(
-    connection,
-    mint,
-    splToken.TOKEN_PROGRAM_ID,
-    // not used
-    anchor.web3.Keypair.generate()
-  )
-
-  let largestTokenAccount: splToken.AccountInfo | undefined
+  let largestTokenAccount: splToken.Account | undefined
   const largestHolder = largestHolders?.value[0]?.address
   if (largestHolder) {
     largestTokenAccount = await withTrace(
-      () => certificateMintToken.getAccountInfo(largestHolder),
+      () => splToken.getAccount(connection, largestHolder),
       trace,
       { op: 'getTokenAccount' }
     )

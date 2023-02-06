@@ -4,7 +4,7 @@ import { getBatchedMultipleAccounts } from '@cardinal/common'
 import { findNamespaceId } from '@cardinal/namespaces'
 import type { TokenManagerData } from '@cardinal/token-manager/dist/cjs/programs/tokenManager'
 import * as metaplex from '@metaplex-foundation/mpl-token-metadata'
-import * as spl from '@solana/spl-token'
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import type { Connection } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { useQuery } from 'react-query'
@@ -78,7 +78,7 @@ export const useUserNamesForNamespace = (
       const allTokenAccounts = await withTrace(
         () =>
           connection.getParsedTokenAccountsByOwner(new PublicKey(walletId), {
-            programId: spl.TOKEN_PROGRAM_ID,
+            programId: TOKEN_PROGRAM_ID,
           }),
         trace,
         { op: 'getParsedTokenAccountsByOwner' }

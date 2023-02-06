@@ -29,14 +29,9 @@ import {
   MetadataKey,
 } from '@metaplex-foundation/mpl-token-metadata'
 import { BorshAccountsCoder } from '@project-serum/anchor'
-import * as spl from '@solana/spl-token'
-import type {
-  AccountInfo,
-  Connection,
-  GetMultipleAccountsConfig,
-  ParsedAccountData,
-  PublicKey,
-} from '@solana/web3.js'
+import * as splToken from '@solana/spl-token'
+import { unpackAccount, unpackMint } from '@solana/spl-token'
+import type { AccountInfo, Connection, PublicKey } from '@solana/web3.js'
 
 export type AccountType =
   | 'metaplexMetadata'
@@ -64,8 +59,8 @@ export type AccountDataById = {
         AccountTypeData)
     | (AccountData<TimeInvalidatorData> & AccountInfo<Buffer> & AccountTypeData)
     | (AccountData<UseInvalidatorData> & AccountInfo<Buffer> & AccountTypeData)
-    | (spl.AccountInfo & AccountTypeData)
-    | (spl.MintInfo & AccountInfo<Buffer> & AccountTypeData)
+    | (splToken.Account & AccountTypeData)
+    | (splToken.Mint & AccountInfo<Buffer> & AccountTypeData)
     | (AccountData<metaplex.MetadataData> &
         AccountInfo<Buffer> &
         AccountTypeData)
@@ -80,7 +75,7 @@ export type AccountDataById = {
 
 export const deserializeAccountInfos = (
   accountIds: (PublicKey | null)[],
-  accountInfos: (AccountInfo<Buffer | ParsedAccountData> | null)[]
+  accountInfos: (AccountInfo<Buffer> | null)[]
 ): AccountDataById => {
   return accountInfos.reduce((acc, accountInfo, i) => {
     const ownerString = accountInfo?.owner.toString()
@@ -165,19 +160,18 @@ export const deserializeAccountInfos = (
           }
         } catch (e) {}
         return acc
-      case spl.TOKEN_PROGRAM_ID.toString():
-        const accountData = accountInfo?.data as ParsedAccountData
+      case splToken.TOKEN_PROGRAM_ID.toString():
         acc[accountIds[i]!.toString()] =
-          accountData.space === spl.MintLayout.span
+          accountInfo?.data.length === splToken.MintLayout.span
             ? {
                 type: 'mint',
                 ...(accountInfo as AccountInfo<Buffer>),
-                ...(accountData.parsed?.info as spl.MintInfo),
+                ...unpackMint(accountIds[i]!, accountInfo),
               }
             : {
                 type: 'tokenAccount',
                 ...(accountInfo as AccountInfo<Buffer>),
-                ...(accountData.parsed?.info as spl.AccountInfo),
+                ...unpackAccount(accountIds[i]!, accountInfo),
               }
         return acc
       case metaplex.MetadataProgram.PUBKEY.toString():
@@ -228,10 +222,6 @@ export const accountDataById = async (
   ids: (PublicKey | null)[]
 ): Promise<AccountDataById> => {
   const filteredIds = ids.filter((id): id is PublicKey => id !== null)
-  const accountInfos = await getBatchedMultipleAccounts(
-    connection,
-    filteredIds,
-    { encoding: 'jsonParsed' } as GetMultipleAccountsConfig
-  )
+  const accountInfos = await getBatchedMultipleAccounts(connection, filteredIds)
   return deserializeAccountInfos(filteredIds, accountInfos)
 }
